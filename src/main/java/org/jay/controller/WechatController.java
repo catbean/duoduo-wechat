@@ -7,6 +7,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import org.apache.commons.lang3.StringUtils;
+import org.jay.service.MenuService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class WechatController {
 
     @Autowired
     private WxMpMessageRouter router;
+
+    @Autowired
+    private MenuService menuService;
 
     @ResponseBody
     @GetMapping(produces = "text/plain;charset=utf-8")
@@ -67,51 +71,8 @@ public class WechatController {
 
         if (!this.wxService.checkSignature(timestamp, nonce, signature)) {
             throw new IllegalArgumentException("非法请求，可能属于伪造的请求！");
-        }
-
-        // 设置菜单
-        WxMenu wxMenu = new WxMenu();
-        String a = "{\n"
-                + "  \"menu\": {\n"
-                + "    \"button\": [\n"
-                + "      {\n"
-                + "        \"type\": \"click\",\n"
-                + "        \"name\": \"今日歌曲\",\n"
-                + "        \"key\": \"V1001_TODAY_MUSIC\"\n"
-                + "      },\n"
-                + "      {\n"
-                + "        \"type\": \"click\",\n"
-                + "        \"name\": \"歌手简介\",\n"
-                + "        \"key\": \"V1001_TODAY_SINGER\"\n"
-                + "      },\n"
-                + "      {\n"
-                + "        \"name\": \"菜单\",\n"
-                + "        \"sub_button\": [\n"
-                + "          {\n"
-                + "            \"type\": \"view\",\n"
-                + "            \"name\": \"搜索\",\n"
-                + "            \"url\": \"http://www.soso.com/\"\n"
-                + "          },\n"
-                + "          {\n"
-                + "            \"type\": \"view\",\n"
-                + "            \"name\": \"视频\",\n"
-                + "            \"url\": \"http://v.qq.com/\"\n"
-                + "          },\n"
-                + "          {\n"
-                + "            \"type\": \"click\",\n"
-                + "            \"name\": \"赞一下我们\",\n"
-                + "            \"key\": \"V1001_GOOD\"\n"
-                + "          }\n"
-                + "        ]\n"
-                + "      }\n"
-                + "    ]\n"
-                + "  }\n"
-                + "}";
-
-        try {
-            wxService.getMenuService().menuCreate(wxMenu.fromJson(a));
-        } catch (WxErrorException e) {
-            e.printStackTrace();
+        } else {
+            menuService.createMenu();
         }
 
         String out = null;
