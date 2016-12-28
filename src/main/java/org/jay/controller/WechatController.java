@@ -1,5 +1,7 @@
 package org.jay.controller;
 
+import me.chanjar.weixin.common.bean.menu.WxMenu;
+import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -66,7 +68,52 @@ public class WechatController {
         if (!this.wxService.checkSignature(timestamp, nonce, signature)) {
             throw new IllegalArgumentException("非法请求，可能属于伪造的请求！");
         }
-        
+
+        // 设置菜单
+        WxMenu wxMenu = new WxMenu();
+        String a = "{\n"
+                + "  \"menu\": {\n"
+                + "    \"button\": [\n"
+                + "      {\n"
+                + "        \"type\": \"click\",\n"
+                + "        \"name\": \"今日歌曲\",\n"
+                + "        \"key\": \"V1001_TODAY_MUSIC\"\n"
+                + "      },\n"
+                + "      {\n"
+                + "        \"type\": \"click\",\n"
+                + "        \"name\": \"歌手简介\",\n"
+                + "        \"key\": \"V1001_TODAY_SINGER\"\n"
+                + "      },\n"
+                + "      {\n"
+                + "        \"name\": \"菜单\",\n"
+                + "        \"sub_button\": [\n"
+                + "          {\n"
+                + "            \"type\": \"view\",\n"
+                + "            \"name\": \"搜索\",\n"
+                + "            \"url\": \"http://www.soso.com/\"\n"
+                + "          },\n"
+                + "          {\n"
+                + "            \"type\": \"view\",\n"
+                + "            \"name\": \"视频\",\n"
+                + "            \"url\": \"http://v.qq.com/\"\n"
+                + "          },\n"
+                + "          {\n"
+                + "            \"type\": \"click\",\n"
+                + "            \"name\": \"赞一下我们\",\n"
+                + "            \"key\": \"V1001_GOOD\"\n"
+                + "          }\n"
+                + "        ]\n"
+                + "      }\n"
+                + "    ]\n"
+                + "  }\n"
+                + "}";
+
+        try {
+            wxService.getMenuService().menuCreate(wxMenu.fromJson(a));
+        } catch (WxErrorException e) {
+            e.printStackTrace();
+        }
+
         String out = null;
         if (encType == null) {
             // 明文传输的消息
